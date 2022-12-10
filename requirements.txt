@@ -1,0 +1,6 @@
+holoviews
+hvplot
+datashader
+panel
+stumpy
+yfinance
