@@ -11,7 +11,7 @@ hv.extension('bokeh')
 
 @pn.cache()
 def getDF(ticker ,timeframe='1d'):
-    df = yf.Ticker(ticker).history(interval=timeframe,start="2010-01-01" , end="2022-12-01")
+    df = yf.Ticker(ticker).history(interval=timeframe,start="2000-01-01" , end="2022-12-01")
     return df
 
 def myhvplot(avg, highlight):
@@ -41,15 +41,15 @@ def find_patterns(ticker1='MSFT' , ticker2='TSLA' , timeframe='1d' , m=200,varia
     ticker1_motif_index = mp[:, 0].argmin()
     ticker2_motif_index = mp[ticker1_motif_index, 1]
     print(DF1.iloc[ticker1_motif_index : ticker1_motif_index + m ]['Close'])
-    return hv.Curve(DF1.Close)*hv.Curve(DF1.iloc[ticker1_motif_index : ticker1_motif_index + m]['Close']).relabel(f'{ticker1}').opts( height=500 , width=500 )  + hv.Curve(DF2.Close)*hv.Curve(DF2.iloc[ticker2_motif_index : ticker2_motif_index + m]['Close']).relabel(f'{ticker2}').opts( height=500 , width=500) 
+    return hv.Curve(DF1.Close)*hv.Curve(DF1.iloc[ticker1_motif_index : ticker1_motif_index + m]['Close']).relabel(f'{ticker1}').opts( height=400 , width=750 , show_grid=True)  + hv.Curve(DF2.Close)*hv.Curve(DF2.iloc[ticker2_motif_index : ticker2_motif_index + m]['Close']).relabel(f'{ticker2}').opts( height=400 , width=750 , show_grid=True) 
 
 def create_app2():
-    select = pn.widgets.Select(name='Select Main Ticker', options=['MSFT', 'AMZN', 'TSLA' ,'OXY'])
-    select2 = pn.widgets.Select(name='Select Secondary Ticker', options=['AMZN', 'MSFT',  'TSLA' ,'OXY'])
+    select = pn.widgets.Select(name='Select Main Ticker', options=['CRM' , 'MSFT', 'AMZN', 'TSLA' ,'OXY'])
+    select2 = pn.widgets.Select(name='Select Secondary Ticker', options=['MSFT', 'AMZN',  'TSLA' ,'OXY'])
     timeframe = pn.widgets.Select(name='Select Time Frame' , options=['1d','5m','15m','30m','1h'])
     windowsize = pn.widgets.IntSlider(name='window', value=200, start=1, end=500)
     interactive2 = pn.bind(find_patterns, ticker1=select , ticker2=select2 ,timeframe = timeframe , m=windowsize)
-    return pn.Column('# Similar Pattern Detection - US Market',select,select2,timeframe , windowsize, interactive2)
+    return pn.Column('# Similar Pattern Detection - US Market',pn.Row(select,select2,timeframe , windowsize), interactive2)
 
 def main():
     APP_ROUTES = {"/app1": create_app, "app2":create_app2 , "app3": pn.pane.Markdown("# App2")}
