@@ -9,6 +9,7 @@ import param , hvplot.pandas
 pn.extension()
 hv.extension('bokeh')
 
+@pn.cache()
 def getDF(ticker ,timeframe='1d'):
     df = yf.Ticker(ticker).history(interval=timeframe,start="2010-01-01" , end="2022-12-01")
     return df
@@ -32,11 +33,10 @@ def create_app():
     return pn.Column('# Outlier Detection - US Market',select,window, sigma, interactive)
 
 
-def find_patterns(ticker1='MSFT' , ticker2='TSLA' , timeframe='1d' , variable='Close', view_fn=hvplot):
+def find_patterns(ticker1='MSFT' , ticker2='TSLA' , timeframe='1d' , m=200,variable='Close', view_fn=hvplot):
     DF1 = getDF(ticker1,timeframe); DF2 = getDF(ticker2,timeframe)
     DF1 = DF1.resample('5D').mean(); DF1['Date'] = DF1.index
     DF2 = DF2.resample('5D').mean(); DF2['Date'] = DF2.index
-    m=200
     mp = stumpy.stump(T_A = DF1['Close'], m = m, T_B = DF2['Close'], ignore_trivial = False)
     ticker1_motif_index = mp[:, 0].argmin()
     ticker2_motif_index = mp[ticker1_motif_index, 1]
@@ -47,8 +47,9 @@ def create_app2():
     select = pn.widgets.Select(name='Select Main Ticker', options=['MSFT', 'AMZN', 'TSLA' ,'OXY'])
     select2 = pn.widgets.Select(name='Select Secondary Ticker', options=['AMZN', 'MSFT',  'TSLA' ,'OXY'])
     timeframe = pn.widgets.Select(name='Select Time Frame' , options=['1d','5m','15m','30m','1h'])
-    interactive2 = pn.bind(find_patterns, ticker1=select , ticker2=select2 ,timeframe = timeframe)
-    return pn.Column('# Similar Pattern Detection - US Market',select,select2,timeframe , interactive2)
+    windowsize = pn.widgets.IntSlider(name='window', value=200, start=1, end=500)
+    interactive2 = pn.bind(find_patterns, ticker1=select , ticker2=select2 ,timeframe = timeframe , m=windowsize)
+    return pn.Column('# Similar Pattern Detection - US Market',select,select2,timeframe , windowsize, interactive2)
 
 def main():
     APP_ROUTES = {"/app1": create_app, "app2":create_app2 , "app3": pn.pane.Markdown("# App2")}
